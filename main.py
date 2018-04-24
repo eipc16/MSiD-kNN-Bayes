@@ -9,13 +9,16 @@
 # ----------------- TEN PLIK MA POZOSTAC NIEZMODYFIKOWANY ------------------
 # --------------------------------------------------------------------------
 
-from content import (hamming_distance, sort_train_labels_knn, model_selection_knn, model_selection_nb, estimate_p_x_y_nb,
-                              classification_error, estimate_a_priori_nb, p_y_x_nb, p_y_x_knn)
-import numpy as np
-import matplotlib.pyplot as plt
 import pickle
 import warnings
 from time import sleep
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from content import (classification_error, estimate_a_priori_nb, estimate_p_x_y_nb,
+                     hamming_distance, model_selection_knn, model_selection_nb, p_y_x_knn, p_y_x_nb,
+                     sort_train_labels_knn)
 from test import TestRunner
 
 
@@ -28,7 +31,7 @@ def plot_a_b_errors(errors, a_points, b_points):
     ax.set_xticklabels([''] + a_points)
     ax.set_yticklabels([''] + b_points)
     ax.xaxis.set_label_position('bottom')
-    ax.xaxis.set_tick_params(labelbottom=True,labeltop=False,top=False)
+    ax.xaxis.set_tick_params(labelbottom=True, labeltop=False, top=False)
     ax.set_xlabel('Parametr b')
     ax.set_ylabel('Parametr a')
     plt.draw()
@@ -40,7 +43,7 @@ def plot_error_NB_KNN(error_NB, error_KNN):
     plt.rcParams['image.cmap'] = 'gray'
     plt.rcParams['image.interpolation'] = 'none'
     plt.style.use(['dark_background'])
-    labels = ["Naive Bayess", "KNN"]
+    labels = ["Naive Bayes", "KNN"]
     data = [error_NB, error_KNN]
 
     xlocations = np.array(range(len(data))) + 0.5
@@ -66,7 +69,6 @@ def classification_KNN_vs_no_neighbours(xs, ys):
     plt.plot(xs, ys, 'r-', color='#FFCC55')
     plt.draw()
     plt.waitforbuttonpress(0)
-
 
 
 def word_cloud(frequencies, title):
@@ -109,7 +111,6 @@ def load_data():
 
 
 def run_training():
-
     data = load_data()
 
     # KNN model selection
@@ -134,10 +135,11 @@ def run_training():
     print('--------------------- To moze potrwac ok. 1 min ------------------------')
 
     # NB model selection
-    error_best, best_a, best_b, errors = model_selection_nb(data['Xtrain'], data['Xval'], data['ytrain'],
+    error_best, best_a, best_b, errors = model_selection_nb(data['Xtrain'], data['Xval'],
+                                                            data['ytrain'],
                                                             data['yval'], a_values, b_values)
 
-    print('Najlepsze a: {}, b: {} i najlepszy blad: {:.4f}'.format(best_a,best_b,error_best))
+    print('Najlepsze a: {}, b: {} i najlepszy blad: {:.4f}'.format(best_a, best_b, error_best))
     print('\n--- Wcisnij klawisz, aby kontynuowac ---')
     plot_a_b_errors(errors, a_values, b_values)
     p_x_y = estimate_p_x_y_nb(data['Xtrain'], data['ytrain'], best_a, best_b)
@@ -146,13 +148,13 @@ def run_training():
     print('\n------Wizualizacja najbardziej popularnych slow dla poszczegolnych klas------')
     print('--Sa to slowa o najwyzszym prawdopodobienstwie w danej klasie dla modelu NB--')
 
-    groupnames = data['groupnames']
-    words = {}
-    for x in range(classes_no):
-        indices = np.argsort(p_x_y[x, :])[::-1][:50]
-        words[groupnames[x]] = {word: prob for word, prob in zip(data['wordlist'][indices], p_x_y[x, indices])}
-
     try:
+        groupnames = data['groupnames']
+        words = {}
+        for x in range(classes_no):
+            indices = np.argsort(p_x_y[x, :])[::-1][:50]
+            words[groupnames[x]] = {word: prob for word, prob in
+                                    zip(data['wordlist'][indices], p_x_y[x, indices])}
         word_clouds(words.values(), words.keys())
     except Exception:
         print('---Wystapil problem z biblioteka wordcloud--- ')
@@ -178,4 +180,3 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     run_unittests()
     run_training()
-
